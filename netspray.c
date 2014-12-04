@@ -1,6 +1,6 @@
 #include "netspray.h"
 
-int netspray(char *bytes, size_t bytes_len, struct netspray_state *this)
+int netspray(char *buffer, size_t buffer_size, struct netspray_state *this)
 {
   // we need a state to save to
   if(NULL == this)
@@ -11,7 +11,7 @@ int netspray(char *bytes, size_t bytes_len, struct netspray_state *this)
   int bytes_written = 0;
   if(0 != this->write)
   {
-    if(-1 == (bytes_written = netspray_write_bytes(bytes, bytes_len, this->sockfd)))
+    if(-1 == (bytes_written = netspray_write_bytes(buffer, buffer_size, this->sockfd)))
     { fprintf(stderr, "error: write bytes\n"); return -1; }
   }
 
@@ -41,15 +41,14 @@ int netspray(char *bytes, size_t bytes_len, struct netspray_state *this)
   return bytes_written;
 }
 
-int netspray_write_bytes(char *bytes, size_t bytes_len, int sockfd)
+int netspray_write_bytes(char *buffer, size_t buffer_size, int sockfd)
 {
   int bytes_written = 0;
   int bytes_written_temp = -1;
 
-  // printf("%s", bytes);
-  while(bytes_written < bytes_len)
+  while(bytes_written < buffer_size)
   {
-    if(-1 == (bytes_written_temp = send(sockfd, &(bytes[bytes_written]), bytes_len - bytes_written, 0)))
+    if(-1 == (bytes_written_temp = send(sockfd, &(buffer[bytes_written]), buffer_size - bytes_written, 0)))
     {
       perror("send()");
       break;

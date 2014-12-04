@@ -36,17 +36,17 @@ struct netspray_state
 
 };
 
-// creates a socket, writes bytes_len bytes to it, closes socket
-// returns bytes written to socket, or error
+// creates a socket, writes buffer_size bytes to it, closes socket
+// returns number of bytes written to socket, or error
 // will keep a connection open after writing, if desired (stream = 1)
-// can read from a connection, but not one that is kept open
-int netspray(char *bytes, size_t bytes_len, struct netspray_state *this);
+// can read from a connection if desired (via fork() child)
+int netspray(char *buffer, size_t buffer_size, struct netspray_state *this);
 
 // writes the given number of bytes to the socket
-int netspray_write_bytes(char *bytes, size_t bytes_len, int sockfd);
+int netspray_write_bytes(char *buffer, size_t buffer_size, int sockfd);
 
 // reads until heath death of socket (todo feature will fix this)
-int netspray_read_bytes(char *buffer, size_t buffer_len, int sockfd);
+int netspray_read_bytes(char *buffer, size_t buffer_size, int sockfd);
 
 // creates a new connection from a given state
 int netspray_new_connection(struct netspray_state *this);
