@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define NETSPRAY_STATE_BUFFER_LEN 1024
+#define NETSPRAY_STATE_BUFFER_SIZE 1024
 
 struct netspray_state
 {
@@ -23,15 +23,16 @@ struct netspray_state
   char write; // 1 if we want to send() data
   char read; // 1 if we want to recv() data
 
-  size_t buffer_len;
   // ==== end user mutable ====
   // ...unless you really want to ;)
+  char reading;
 
   struct addrinfo *addr;
 
   int sockfd;
 
-  char buffer[NETSPRAY_STATE_BUFFER_LEN];
+  char buffer[NETSPRAY_STATE_BUFFER_SIZE];
+  size_t buffer_size;
 
 };
 

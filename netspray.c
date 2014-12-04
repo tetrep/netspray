@@ -6,20 +6,33 @@ int netspray(char *bytes, size_t bytes_len, struct netspray_state *this)
   if(NULL == this)
   { perror("null netspray state"); return -1; }
 
-  if(0 != netspray_new_connection(this)){perror("new connection"); return -1;}
+  if(0 != netspray_new_connection(this)){fprintf(stderr, "error: new connection\n"); return -1;}
 
   int bytes_written = 0;
   if(0 != this->write)
   {
     if(-1 == (bytes_written = netspray_write_bytes(bytes, bytes_len, this->sockfd)))
-    { perror("write bytes"); return -1; }
+    { fprintf(stderr, "error: write bytes\n"); return -1; }
   }
 
-  // we can only read when we aren't streaming because we're dumb
-  if(0 != this->read && 0 == this->stream)
+  if(0 != this->read && 0 == this->reading)
   {
-    if(-1 == netspray_read_bytes(this->buffer, this->buffer_len, this->sockfd))
-    { perror("read bytes"); return -1; }
+    //we only want one child reading
+    //so read errors will be fatal for that connection
+    this->reading = 1;
+
+    //not sure the best spot to set this
+    this->buffer_size = NETSPRAY_STATE_BUFFER_SIZE;
+
+    int pid = fork();
+    if(-1 == pid)
+    { perror("read's fork()"); return -1; }
+    else if(0 == pid)
+    {
+      //read to the death
+      while(-1 != netspray_read_bytes(this->buffer, this->buffer_size, this->sockfd))
+      { fprintf(stdout, this->buffer); }
+    }
   }
 
   if(0 == this->stream)
@@ -48,24 +61,21 @@ int netspray_write_bytes(char *bytes, size_t bytes_len, int sockfd)
   return bytes_written;
 }
 
-int netspray_read_bytes(char *buffer, size_t buffer_len, int sockfd)
+int netspray_read_bytes(char *buffer, size_t buffer_size, int sockfd)
 {
   int bytes_read = 0;
   int bytes_read_temp = 0;
 
   while(bytes_read_temp >= 0)
   {
-    if(-1 == (bytes_read_temp = recv(sockfd, buffer, buffer_len-1, 0)))
+    if(-1 == (bytes_read_temp = recv(sockfd, buffer, buffer_size-1, 0)))
     {
       perror("recv()");
       break;
     }
     else
-    {
-      // ensure buffer is valid cstring before printing
-      buffer[buffer_len-1] = '\0';
-      fprintf(stderr, "received %i bytes:\n%s", bytes_read_temp, buffer);
-    }
+    //make buffer valid cstring
+    { buffer[buffer_size-1] = '\0'; }
 
     bytes_read += bytes_read_temp;
   }
@@ -110,7 +120,7 @@ int netspray_new_connection(struct netspray_state *this)
 
     if(NULL == this->addr)
     {
-      perror("could not connect to any addr");
+      fprintf(stderr, "could not connect to any addr\n");
       return -1;
     }
   }
@@ -122,6 +132,7 @@ int netspray_new_connection(struct netspray_state *this)
 void netspray_cleanup(struct netspray_state *this)
 {
   this->addr = NULL;
+  this->reading = 0;
 
   close(this->sockfd);
   this->sockfd = -1;
