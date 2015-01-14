@@ -24,15 +24,20 @@ int netspray(char *buffer, size_t buffer_size, struct netspray_state *this)
     //not sure the best spot to set this
     this->buffer_size = NETSPRAY_STATE_BUFFER_SIZE;
 
-    int pid = fork();
-    if(-1 == pid)
-    { perror("read's fork()"); return -1; }
-    else if(0 == pid)
+    if (1 == this->read_async)
     {
-      //read to the death
-      while(-1 != netspray_read_bytes(this->buffer, this->buffer_size, this->sockfd))
-      { fprintf(stdout, this->buffer); }
+      int pid = fork();
+      if(-1 == pid)
+      { perror("read's fork()"); return -1; }
+      else if(0 == pid)
+      {
+        //read to the death
+        while(-1 != netspray_read_bytes(this->buffer, this->buffer_size, this->sockfd))
+        { fprintf(stdout, this->buffer); }
+      }
     }
+    else
+    { netspray_read_bytes(this->buffer, this->buffer_size, this->sockfd); }
   }
 
   if(0 == this->stream)
@@ -46,7 +51,7 @@ int netspray_write_bytes(char *buffer, size_t buffer_size, int sockfd)
   int bytes_written = 0;
   int bytes_written_temp = -1;
 
-  while(bytes_written < buffer_size)
+  while((size_t) bytes_written < buffer_size)
   {
     if(-1 == (bytes_written_temp = send(sockfd, &(buffer[bytes_written]), buffer_size - bytes_written, 0)))
     {

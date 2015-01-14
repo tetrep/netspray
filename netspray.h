@@ -22,6 +22,7 @@ struct netspray_state
   char stream; // 0 if we only one to send once with a connection
   char write; // 1 if we want to send() data
   char read; // 1 if we want to recv() data
+  char read_async; // 1 if we want to fork to recv() data
 
   // ==== end user mutable ====
   // ...unless you really want to ;)
