@@ -24,11 +24,12 @@ struct netspray_state
   char read; // 1 if we want to recv() data
   char read_async; // 1 if we want to fork to recv() data
 
+  struct addrinfo *addr; // just init this to NULL cus i'm an idiot
+
   // ==== end user mutable ====
   // ...unless you really want to ;)
   char reading;
 
-  struct addrinfo *addr;
 
   int sockfd;
 
