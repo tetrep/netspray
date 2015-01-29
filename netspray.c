@@ -34,8 +34,7 @@ int netspray(char *buffer, size_t buffer_size, struct netspray_state *this)
         //read to the death
         while(-1 != netspray_read_bytes(this->buffer, this->buffer_size, this->sockfd))
         { fprintf(stdout, this->buffer); }
-        // TODO this should be graceful
-        abort();
+
         return -1;
       }
     }
@@ -68,6 +67,8 @@ int netspray_write_bytes(char *buffer, size_t buffer_size, int sockfd)
   return bytes_written;
 }
 
+// TODO we probably don't want to do this in a loop, makes error
+// handling a bitch (aka we do it wrong)
 int netspray_read_bytes(char *buffer, size_t buffer_size, int sockfd)
 {
   int bytes_read = 0;
@@ -78,6 +79,7 @@ int netspray_read_bytes(char *buffer, size_t buffer_size, int sockfd)
     if(-1 == (bytes_read_temp = recv(sockfd, buffer, buffer_size-1, 0)))
     {
       perror("recv()");
+      bytes_read = -1;
       break;
     }
     else
