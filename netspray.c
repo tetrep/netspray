@@ -34,7 +34,8 @@ int netspray(char *buffer, size_t buffer_size, struct netspray_state *this)
         //read to the death
         while(-1 != netspray_read_bytes(this->buffer, this->buffer_size, this->sockfd))
         { fprintf(stdout, this->buffer); }
-
+        // TODO this should be graceful
+        abort();
         return -1;
       }
     }
