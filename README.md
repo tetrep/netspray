@@ -6,6 +6,8 @@ shittier netcat, but as a c library
 given a host and port, can create a tcp connection and send/receive arbitrary data. good for spamming.
 
 ##todo
+what will probably end up being a total rewrite. i don't see the api changing much but the more i program in different languages the more my style changes.
+
 lisening! you know, that other thing netcat can do.
 
 macros for features so we can get the most unhealthily slim binaries if we only need a subset of this feature poor library.
