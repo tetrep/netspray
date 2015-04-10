@@ -6,7 +6,7 @@ int netspray(char *buffer, size_t buffer_size, struct netspray_state *this)
   if(NULL == this)
   { perror("null netspray state"); return -1; }
 
-  if(0 != netspray_new_connection(this)){fprintf(stderr, "error: new connection\n"); return -1;}
+  if(0 != netspray_new_connection(this)) { fprintf(stderr, "error: new connection\n"); return -1; }
 
   int bytes_written = 0;
   if(0 != this->write)
@@ -17,11 +17,11 @@ int netspray(char *buffer, size_t buffer_size, struct netspray_state *this)
 
   if(0 != this->read && 0 == this->reading)
   {
-    //we only want one child reading
-    //so read errors will be fatal for that connection
+    // we only want one child reading
+    // so read errors will be fatal for that connection
     this->reading = 1;
 
-    //not sure the best spot to set this
+    // not sure the best spot to set this
     this->buffer_size = NETSPRAY_STATE_BUFFER_SIZE;
 
     if (1 == this->read_async)
@@ -31,9 +31,9 @@ int netspray(char *buffer, size_t buffer_size, struct netspray_state *this)
       { perror("read's fork()"); return -1; }
       else if(0 == pid)
       {
-        //read to the death
+        // read to the death
         while(-1 != netspray_read_bytes(this->buffer, this->buffer_size, this->sockfd))
-        { fprintf(stdout, this->buffer); }
+        { fprintf(stdout, "%s", this->buffer); }
 
         return -1;
       }
@@ -67,27 +67,16 @@ int netspray_write_bytes(char *buffer, size_t buffer_size, int sockfd)
   return bytes_written;
 }
 
-// TODO we probably don't want to do this in a loop, makes error
-// handling a bitch (aka we do it wrong)
+// TODO do we need to read more than once?
 int netspray_read_bytes(char *buffer, size_t buffer_size, int sockfd)
 {
   int bytes_read = 0;
-  int bytes_read_temp = 0;
 
-  while(bytes_read_temp >= 0)
-  {
-    if(-1 == (bytes_read_temp = recv(sockfd, buffer, buffer_size-1, 0)))
-    {
-      perror("recv()");
-      bytes_read = -1;
-      break;
-    }
-    else
-    //make buffer valid cstring
-    { buffer[buffer_size-1] = '\0'; }
+  if(-1 == (bytes_read = recv(sockfd, buffer, buffer_size-1, 0)))
+  { perror("recv()"); }
 
-    bytes_read += bytes_read_temp;
-  }
+  // make buffer valid cstring
+  buffer[buffer_size-1] = '\0';
 
   return bytes_read;
 }
