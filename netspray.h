@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define NETSPRAY_STATE_BUFFER_SIZE 1024
+#define NETSPRAY_STATE_DEFAULT_BUFFER_SIZE 1024
 
 struct netspray_state
 {
@@ -30,10 +30,9 @@ struct netspray_state
   // ...unless you really want to ;)
   char reading;
 
-
   int sockfd;
 
-  char buffer[NETSPRAY_STATE_BUFFER_SIZE];
+  char *buffer;
   size_t buffer_size;
 
 };
@@ -55,5 +54,18 @@ int netspray_new_connection(struct netspray_state *this);
 
 // when we're done with a connection
 void netspray_cleanup(struct netspray_state *this);
+
+// create an "empty" struct netspray_state
+struct netspray_state netspray_new_null_state();
+
+// create a new state for a given addr/port
+struct netspray_state netspray_new_state();
+
+// create a netspray_state with the given params
+struct netspray_state netspray_new_state_wrappee(char *addr_str_in, char *port_str_in,
+                                                 char stream_in, char write_in, char read_in,
+                                                 char read_async_in, struct addrinfo *addr_in,
+                                                 char reading_in, int sockfd_in, char *buffer_in,
+                                                 size_t buffer_size_in);
 
 #endif
