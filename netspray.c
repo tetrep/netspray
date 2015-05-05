@@ -160,8 +160,9 @@ void netspray_cleanup (struct netspray_state *this)
 }
 
 struct netspray_null_state () {
-  struct netspray_state state;
 
+  // exploded version of wrappee call
+  /*
   state.addr_str = NULL;
   state.port_str = NULL;
 
@@ -178,8 +179,9 @@ struct netspray_null_state () {
 
   state.buffer = NULL;
   state.buffer_size = 0;
+  */
 
-  return state;
+  return netspray_new_state_wrappee(NULL, NULL, 0, 0, 0, 0, NULL, 0, -1, NULL, 0);
 }
 
 // TODO create flags so we can set options "cleanly" with 1 variable
@@ -215,7 +217,7 @@ struct netspray_state netspray_new_state_wrappee (char *addr_str_in, char *port_
                                                   char read_async_in, struct addrinfo *addr_in,
                                                   char reading_in, int sockfd_in, char *buffer_in,
                                                   size_t buffer_size_in) {
-  struct netspray_state state = netspray_null_state();
+  struct netspray_state state;
 
   state.addr_str = addr_str_in;
   state.port_str = port_str_in;
